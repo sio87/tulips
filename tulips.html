@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Garden of tulips | Nicole</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --sky-top:#0D0A20;
+    --sky-mid:#1B1440;
+    --sky-bottom:#2E1D57;
+    --hill-back:#1E3B34;
+    --hill-front:#12271F;
+    --moon:#FDF6E3;
+    --text-cream:#F3E9F9;
+    --text-cream-soft:#B9A9D1;
+    --btn:#8E6BC7;
+    --btn-dark:#6A4C9C;
+    --firefly:#FFE79A;
+  }
+
+  html, body{
+    height:100%;
+    margin:0;
+  }
+
+  body{
+    font-family:'Nunito', sans-serif;
+    background: radial-gradient(130% 95% at 50% 100%, var(--sky-bottom) 0%, var(--sky-mid) 45%, var(--sky-top) 100%);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+
+  .font-display{
+    font-family:'Fredoka', sans-serif;
+  }
+
+  .depth-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    will-change: transform;
+  }
+
+  .stars{ z-index:0; }
+  .star{
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+    opacity:0;
+    transition: opacity 1.1s ease;
+  }
+  body.started .star{
+    opacity: var(--star-max, 0.9);
+    animation: twinkle 3.4s ease-in-out infinite;
+    animation-delay: var(--twinkle-delay, 0s);
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity: calc(var(--star-max, 0.9) * 0.3); }
+    50%{ opacity: var(--star-max, 0.9); }
+  }
+
+  .shooting-star{
+    position:fixed;
+    width:2px;
+    height:2px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
+    z-index:0;
+  }
+  .shooting-star::before{
+    content:"";
+    position:absolute;
+    top:1px;
+    right:1px;
+    width:90px;
+    height:1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.9), transparent);
+    transform-origin: right center;
+    transform: rotate(210deg);
+  }
+  @keyframes shoot{
+    0%{ transform: translate(0,0); opacity:1; }
+    85%{ opacity:1; }
+    100%{ transform: translate(-360px, 200px); opacity:0; }
+  }
+
+  .moon-layer{ z-index:0; }
+  .moon{
+    position:absolute;
+    top:8%;
+    right:10%;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background: radial-gradient(circle at 38% 32%, #FFFDF5, var(--moon) 60%, #EFE4C8 100%);
+    box-shadow: 0 0 26px 12px rgba(253,246,227,0.22);
+    opacity:0;
+    transform: translateY(50px) scale(0.85);
+    transition: opacity 1.8s cubic-bezier(0.16,1,0.3,1), transform 1.8s cubic-bezier(0.16,1,0.3,1);
+    transition-delay: 0.3s;
+  }
+  body.started .moon{
+    opacity:1;
+    transform: translateY(0) scale(1);
+  }
+  .moon::before{
+    content:"";
+    position:absolute;
+    top:16px; left:11px;
+    width:11px; height:11px;
+    border-radius:50%;
+    background: rgba(200,190,160,0.35);
+  }
+  .moon::after{
+    content:"";
+    position:absolute;
+    top:36px; left:34px;
+    width:7px; height:7px;
+    border-radius:50%;
+    background: rgba(200,190,160,0.3);
+  }
+
+  .hills-layer{ z-index:1; }
+  .hill{
+    position:absolute;
+    left:-10%;
+    width:120%;
+    bottom:-6%;
+    border-radius:50% 50% 0 0 / 100% 100% 0 0;
+    transform: translateY(40%);
+    transition: transform 1.3s cubic-bezier(0.22,1,0.36,1);
+  }
+  .hill-back{
+    height: 26vh;
+    background: var(--hill-back);
+    transition-delay: 0.05s;
+  }
+  .hill-front{
+    height: 19vh;
+    background: var(--hill-front);
+    bottom: -8%;
+    transition-delay: 0.2s;
+  }
+  body.started .hill{
+    transform: translateY(0);
+  }
+
+  .garden-bed{
+    z-index:2;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:19vh;
+  }
+
+  .firefly-layer{ z-index:3; }
+
+  .tulip{
+    position:absolute;
+    bottom:0;
+    left:0;
+    transform-origin: bottom center;
+  }
+  
+  #gardenBed{
+    position:fixed !important;
+    bottom:0 !important;
+    left:0 !important;
+    right:0 !important;
+    top:auto !important;
+    height:19vh !important;
+    z-index:2;
+  }
+
+  .tulip-grow{
+    animation: growTulip 1600ms cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+  }
+
+  .tulip-sway{
+    animation: sway var(--sway-dur, 3.6s) ease-in-out infinite;
+    animation-delay: var(--sway-delay, 0s);
+  }
+
+  @keyframes growTulip{
+    0%{ transform: scaleY(0.05) scaleX(0.2) translateY(8%); opacity:0; }
+    45%{ opacity:1; }
+    100%{ transform: scaleY(1) scaleX(1) translateY(0%); opacity:1; }
+  }
+
+  @keyframes sway{
+    0%, 100%{ transform: rotate(-2deg); }
+    50%{ transform: rotate(2deg); }
+  }
+
+  .stem{
+    width:3px;
+    background: linear-gradient(180deg, #5A8E66, #3D6B48);
+    margin: 0 auto;
+    border-radius: 2px;
+    position:relative;
+  }
+
+  .leaf{
+    position:absolute;
+    width:12px;
+    height:6px;
+    background:#4A7A55;
+    border-radius: 0 100% 100% 0;
+  }
+
+  .tulip-head{
+    position:absolute;
+    left:50%;
+    transform: translateX(-50%);
+    width:20px;
+    height:28px;
+  }
+
+  .petal{
+    position:absolute;
+    width:12px;
+    height:18px;
+    border-radius: 50% 50% 50% 40% / 60% 60% 40% 40%;
+    left:50%;
+    margin-left:-6px;
+    top:0;
+  }
+
+  .petal-1{ transform: translateX(-4px); }
+  .petal-2{ transform: translateX(4px); }
+  .petal-3{ transform: translateX(0); z-index:1; }
+
+  .center{
+    position:absolute;
+    left:50%; top:50%;
+    width:6px; height:6px;
+    background: radial-gradient(circle at 35% 30%, #FFFAEC, #FFE79A);
+    border-radius:50%;
+    transform: translate(-50%,-50%);
+    z-index:5;
+    box-shadow: 0 0 4px 1px rgba(255,231,154,0.4);
+  }
+
+  .firefly{
+    position:absolute;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background: var(--firefly);
+    box-shadow: 0 0 8px 3px rgba(255,231,154,0.8), 0 0 16px 6px rgba(255,231,154,0.35);
+    animation:
+      popIn 500ms cubic-bezier(0.34,1.56,0.64,1) forwards,
+      flicker 2.4s ease-in-out infinite var(--pop-dur, 500ms),
+      drift-fly var(--drift-dur, 7s) ease-in-out infinite var(--pop-dur, 500ms);
+  }
+
+  @keyframes popIn{
+    0%{ transform: scale(0); opacity:0; }
+    60%{ transform: scale(1.3); opacity:1; }
+    100%{ transform: scale(1); opacity:1; }
+  }
+
+  @keyframes flicker{
+    0%, 100%{ opacity:0.25; }
+    50%{ opacity:1; }
+  }
+
+  @keyframes drift-fly{
+    0%{ transform: translate(0,0) scale(1); }
+    25%{ transform: translate(var(--dx1), var(--dy1)) scale(1); }
+    50%{ transform: translate(var(--dx2), var(--dy2)) scale(1); }
+    75%{ transform: translate(var(--dx3), var(--dy3)) scale(1); }
+    100%{ transform: translate(0,0) scale(1); }
+  }
+
+  .ui{
+    position:relative;
+    z-index:10;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding: 1.5rem;
+  }
+
+  .grow-btn{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background: var(--btn);
+    color:#fff;
+    font-family:'Fredoka', sans-serif;
+    transition: transform 120ms ease, background 150ms ease, opacity 150ms ease;
+    box-shadow: 0 8px 0 var(--btn-dark);
+    animation: lanternPulse 2.6s ease-in-out infinite;
+  }
+  .grow-btn:active{
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 var(--btn-dark);
+  }
+  .grow-btn:disabled{
+    opacity:0.75;
+    animation: none;
+  }
+
+  @keyframes lanternPulse{
+    0%, 100%{ box-shadow: 0 8px 0 var(--btn-dark), 0 0 0 0 rgba(255,231,154,0); }
+    50%{ box-shadow: 0 8px 0 var(--btn-dark), 0 0 20px 6px rgba(255,231,154,0.4); }
+  }
+
+  .btn-spark{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background: var(--firefly);
+    box-shadow: 0 0 6px 2px rgba(255,231,154,0.9);
+    animation: sparkFloat 1.8s ease-in-out infinite;
+  }
+  @keyframes sparkFloat{
+    0%, 100%{ transform: translateY(0); opacity:0.7; }
+    50%{ transform: translateY(-4px); opacity:1; }
+  }
+
+  .ripple{
+    position:fixed;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(255,231,154,0.35), rgba(142,107,199,0.15) 55%, transparent 75%);
+    transform: translate(-50%,-50%) scale(0);
+    pointer-events:none;
+    z-index:9;
+    animation: rippleOut 900ms ease-out forwards;
+  }
+  @keyframes rippleOut{
+    0%{ transform: translate(-50%,-50%) scale(0); opacity:0.9; }
+    100%{ transform: translate(-50%,-50%) scale(1); opacity:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tulip-grow, .tulip-sway, .firefly, .star, .grow-btn, .btn-spark, .moon, .hill{ animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="depth-layer stars" id="stars"></div>
+  <div class="depth-layer moon-layer" id="moonLayer">
+    <div class="moon"></div>
+  </div>
+  <div class="depth-layer hills-layer" id="hillsLayer">
+    <div class="hill hill-back"></div>
+    <div class="hill hill-front"></div>
+  </div>
+  <div class="depth-layer garden-bed" id="gardenBed"></div>
+  <div class="depth-layer firefly-layer" id="fireflyLayer"></div>
+
+  <div class="ui">
+    <button id="plantBtn" class="grow-btn text-lg font-medium px-5 py-5 rounded-full">
+      <span class="btn-spark"></span>
+    </button>
+  </div>
+
+<script>
+  const body = document.body;
+  const bed = document.getElementById('gardenBed');
+  const fireflyLayer = document.getElementById('fireflyLayer');
+  const starsLayer = document.getElementById('stars');
+  const moonLayer = document.getElementById('moonLayer');
+  const hillsLayer = document.getElementById('hillsLayer');
+  const plantBtn = document.getElementById('plantBtn');
+
+  let flowerCount = 0;
+  let shootingStarTimer = null;
+  const MAX_FLOWERS = 60;
+  const MAX_FIREFLIES = 30;
+
+  const petalPalettes = [
+    ['#FFC2D6', '#FF9EBB'],
+    ['#E3C9F5', '#C9A9E0'],
+    ['#FFE0B2', '#FFC876'],
+    ['#B9E0FF', '#8FCBFF'],
+    ['#FFB4A8', '#FF8C7A'],
+  ];
+
+  function randomBetween(min, max){
+    return Math.random() * (max - min) + min;
+  }
+
+  function makeStars(){
+    for(let i = 0; i < 90; i++){
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = randomBetween(1, 2.4);
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.left = randomBetween(0, 100) + '%';
+      star.style.top = randomBetween(0, 60) + '%';
+      star.style.setProperty('--star-max', randomBetween(0.5, 1).toFixed(2));
+      star.style.setProperty('--twinkle-delay', randomBetween(0, 3) + 's');
+      star.style.transitionDelay = randomBetween(0, 1.1) + 's';
+      starsLayer.appendChild(star);
+    }
+  }
+
+  function spawnShootingStar(){
+    if(!body.classList.contains('started')) return;
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    star.style.top = randomBetween(5, 30) + '%';
+    star.style.left = randomBetween(55, 90) + '%';
+    star.style.animation = 'shoot 1.1s linear forwards';
+    document.body.appendChild(star);
+    setTimeout(() => star.remove(), 1200);
+  }
+
+  function scheduleShootingStars(){
+    shootingStarTimer = setInterval(() => {
+      if(Math.random() < 0.6) spawnShootingStar();
+    }, 6000);
+  }
+
+  function makeTulip(){
+    const tulip = document.createElement('div');
+    tulip.className = 'tulip';
+
+    const leftPos = randomBetween(3, 96);
+    const stemHeight = randomBetween(48, 76);
+    const palette = petalPalettes[Math.floor(Math.random() * petalPalettes.length)];
+
+    tulip.style.left = leftPos + '%';
+    tulip.style.width = '28px';
+    tulip.style.marginLeft = '-14px';
+    tulip.style.setProperty('--sway-dur', randomBetween(3, 4.6) + 's');
+    tulip.style.setProperty('--sway-delay', randomBetween(0, 1.5) + 's');
+
+    const stem = document.createElement('div');
+    stem.className = 'stem';
+    stem.style.height = stemHeight + 'px';
+    tulip.appendChild(stem);
+
+    const leafLeft = document.createElement('div');
+    leafLeft.className = 'leaf';
+    leafLeft.style.bottom = (stemHeight * 0.4) + 'px';
+    leafLeft.style.left = '2px';
+    leafLeft.style.transform = 'rotate(-18deg)';
+    stem.appendChild(leafLeft);
+
+    const leafRight = document.createElement('div');
+    leafRight.className = 'leaf';
+    leafRight.style.bottom = (stemHeight * 0.55) + 'px';
+    leafRight.style.right = '2px';
+    leafRight.style.left = 'auto';
+    leafRight.style.transform = 'rotate(18deg) scaleX(-1)';
+    stem.appendChild(leafRight);
+
+    const head = document.createElement('div');
+    head.className = 'tulip-head';
+    head.style.bottom = stemHeight + 'px';
+
+    const petal1 = document.createElement('div');
+    petal1.className = 'petal petal-1';
+    petal1.style.background = palette[0];
+    petal1.style.boxShadow = `0 0 5px 0.5px ${palette[0]}88`;
+    head.appendChild(petal1);
+
+    const petal2 = document.createElement('div');
+    petal2.className = 'petal petal-2';
+    petal2.style.background = palette[1];
+    petal2.style.boxShadow = `0 0 5px 0.5px ${palette[1]}88`;
+    head.appendChild(petal2);
+
+    const petal3 = document.createElement('div');
+    petal3.className = 'petal petal-3';
+    petal3.style.background = palette[0];
+    petal3.style.boxShadow = `0 0 5px 0.5px ${palette[0]}88`;
+    head.appendChild(petal3);
+
+    const center = document.createElement('div');
+    center.className = 'center';
+    head.appendChild(center);
+
+    tulip.appendChild(head);
+
+    requestAnimationFrame(() => {
+      tulip.classList.add('tulip-grow');
+      setTimeout(() => tulip.classList.add('tulip-sway'), 1600);
+    });
+
+    return tulip;
+  }
+
+  function makeFirefly(){
+    const firefly = document.createElement('div');
+    firefly.className = 'firefly';
+    firefly.style.left = randomBetween(3, 96) + '%';
+    firefly.style.top = randomBetween(15, 85) + '%';
+    firefly.style.setProperty('--dx1', randomBetween(-40, 40) + 'px');
+    firefly.style.setProperty('--dy1', randomBetween(-30, 30) + 'px');
+    firefly.style.setProperty('--dx2', randomBetween(-40, 40) + 'px');
+    firefly.style.setProperty('--dy2', randomBetween(-30, 30) + 'px');
+    firefly.style.setProperty('--dx3', randomBetween(-40, 40) + 'px');
+    firefly.style.setProperty('--dy3', randomBetween(-30, 30) + 'px');
+    firefly.style.setProperty('--drift-dur', randomBetween(6, 10) + 's');
+    firefly.style.setProperty('--pop-dur', randomBetween(0, 300) + 'ms');
+    return firefly;
+  }
+
+  function plantOneTulip(){
+    const tulip = makeTulip();
+    bed.appendChild(tulip);
+    flowerCount += 1;
+
+    if(bed.children.length > MAX_FLOWERS){
+      bed.removeChild(bed.children[0]);
+    }
+  }
+
+  function releaseOneFirefly(){
+    const firefly = makeFirefly();
+    fireflyLayer.appendChild(firefly);
+
+    if(fireflyLayer.children.length > MAX_FIREFLIES){
+      fireflyLayer.removeChild(fireflyLayer.children[0]);
+    }
+  }
+
+  function spawnRipple(x, y){
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    const size = Math.max(window.innerWidth, window.innerHeight) * 1.4;
+    ripple.style.width = size + 'px';
+    ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    document.body.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 950);
+  }
+
+  function growGarden(e){
+    const rect = plantBtn.getBoundingClientRect();
+    spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+    const firstRun = !body.classList.contains('started');
+    if(firstRun){
+      body.classList.add('started');
+      scheduleShootingStars();
+    }
+
+    plantBtn.disabled = true;
+
+    const flowersToPlant = 8;
+    const firefliesToRelease = 5;
+    const baseDelay = firstRun ? 500 : 100;
+
+    for(let i = 0; i < flowersToPlant; i++){
+      setTimeout(plantOneTulip, baseDelay + randomBetween(0, 1400));
+    }
+
+    for(let i = 0; i < firefliesToRelease; i++){
+      setTimeout(releaseOneFirefly, baseDelay + 600 + randomBetween(0, 1200));
+    }
+
+    setTimeout(() => {
+      plantBtn.disabled = false;
+    }, baseDelay + 1900);
+  }
+
+  function handleParallax(e){
+    if(!body.classList.contains('started')) return;
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+
+    moonLayer.style.transform = `translate(${dx * 10}px, ${dy * 6}px)`;
+    starsLayer.style.transform = `translate(${dx * 6}px, ${dy * 4}px)`;
+    hillsLayer.style.transform = `translate(${dx * 3}px, 0)`;
+  }
+
+  plantBtn.addEventListener('click', growGarden);
+  window.addEventListener('mousemove', handleParallax);
+
+  makeStars();
+</script>
+
+</body>
+</html>
